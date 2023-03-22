@@ -130,3 +130,24 @@ ExternalProject_Add(libmad
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
 )
+
+#libogg
+FetchContent_Declare(_libogg
+  URL https://downloads.xiph.org/releases/ogg/libogg-1.3.5.tar.xz
+  URL_HASH MD5=3178c98341559657a15b185bf5d700a5
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_libogg)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/libogg-1.3.5.tar.xz)
+
+ExternalProject_Add(libogg
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/libogg-1.3.5
+  INSTALL_DIR ${PREFIX}
+  CONFIGURE_COMMAND autoreconf -fi && ./configure "--host=arm64-apple-darwin" "--prefix=" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
+)
