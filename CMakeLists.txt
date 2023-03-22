@@ -108,3 +108,25 @@ ExternalProject_Add(faad2
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make -C libfaad DESTDIR=<INSTALL_DIR>/lib install
 )
+
+#libmad
+FetchContent_Declare(_libmad
+  URL https://downloads.sourceforge.net/mad/libmad-0.15.1b.tar.gz
+  URL_HASH MD5=1be543bc30c56fb6bea1d7bf6a64e66c
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_libmad)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/libmad-0.15.1b.tar.gz)
+
+ExternalProject_Add(libmad
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/libmad-0.15.1b
+  INSTALL_DIR ${PREFIX}
+  PATCH_COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/patches/libmad-0.15.1b-fixes-1.patch <SOURCE_DIR> && patch -p1 < <SOURCE_DIR>/libmad-0.15.1b-fixes-1.patch
+  CONFIGURE_COMMAND touch NEWS AUTHORS ChangeLog && autoreconf -fi && ./configure "--host=arm64-apple-darwin" "--prefix=" "ac_cv_func_fork=no" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
+)
