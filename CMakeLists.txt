@@ -90,3 +90,21 @@ ExternalProject_Add(giflib
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make DESTDIR=<INSTALL_DIR>/lib install-include && cp -f libgif.a <INSTALL_DIR>/lib
 )
+
+#faad2
+find_program(AUTORECONF_EXECUTABLE autoreconf REQUIRED)
+if(NOT AUTORECONF_EXECUTABLE)
+  message(FATAL_ERROR "Install autoreconf from brew: brew install automake")
+endif()
+
+ExternalProject_Add(faad2
+  GIT_REPOSITORY https://github.com/knik0/faad2.git
+  GIT_SHALLOW TRUE
+  GIT_TAG 2_10_0
+  INSTALL_DIR ${PREFIX}
+  CONFIGURE_COMMAND autoreconf -fi && ./configure "--host=arm-apple-darwin" "--prefix=" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make -C libfaad
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make -C libfaad DESTDIR=<INSTALL_DIR>/lib install
+)
