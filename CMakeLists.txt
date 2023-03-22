@@ -26,7 +26,8 @@ execute_process(COMMAND ${XCRUN_EXECUTABLE} --sdk ${SDK_NAME} --show-sdk-path
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 set(PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/libs)
-set(DEFAULT_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch arm64 -arch armv7 -arch armv7s")
+set(DEFAULT_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch arm64 -arch armv7 -arch armv7s -I${PREFIX}/include -L${PREFIX}/lib")
+set(PKG_CONFIG_PATH ${PREFIX}/lib/pkgconfig/)
 
 #bzip2
 FetchContent_Declare(_bzip2
