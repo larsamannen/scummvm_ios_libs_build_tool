@@ -152,3 +152,25 @@ ExternalProject_Add(libogg
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
 )
+
+#libtheora
+FetchContent_Declare(_libtheora
+  URL http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2
+  URL_HASH MD5=292ab65cedd5021d6b7ddd117e07cd8e
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_libtheora)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/libtheora-1.1.1.tar.bz2)
+
+ExternalProject_Add(libtheora
+  DEPENDS libogg
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/libtheora-1.1.1
+  INSTALL_DIR ${PREFIX}
+  CONFIGURE_COMMAND autoreconf -fi -I m4 && PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ./configure "--host=arm64-apple-darwin" "--prefix=" "--disable-examples" "--disable-spec" "--disable-doc" CFLAGS=${DEFAULT_FLAGS}  LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
+)
