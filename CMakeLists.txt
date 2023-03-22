@@ -263,3 +263,24 @@ ExternalProject_Add(libmpeg2
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make -C libmpeg2 DESTDIR=<INSTALL_DIR> install && make -C include DESTDIR=<INSTALL_DIR> install
 )
+
+#liba52dec
+FetchContent_Declare(_liba52dec
+  URL https://liba52.sourceforge.net/files/a52dec-0.7.4.tar.gz
+  URL_HASH MD5=caa9f5bc44232dc8aeea773fea56be80
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_liba52dec)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/a52dec-0.7.4.tar.gz)
+
+ExternalProject_Add(liba52dec
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/a52dec-0.7.4
+  INSTALL_DIR ${PREFIX}
+  CONFIGURE_COMMAND autoreconf -fi && ./configure "--host=arm64-apple-darwin" "--prefix=" "--disable-shared" "--enable-static" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make -C liba52
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make -C liba52 DESTDIR=<INSTALL_DIR> install && make -C include DESTDIR=<INSTALL_DIR> install
+)
