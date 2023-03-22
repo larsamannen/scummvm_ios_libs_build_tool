@@ -10,6 +10,8 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
  	cmake_policy(SET CMP0135 NEW)
 endif()
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 include(FetchContent)
 include(ExternalProject)
 
@@ -195,4 +197,25 @@ ExternalProject_Add(libvorbis
   make
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
+)
+
+#libvorbis
+FetchContent_Declare(_flac
+  URL https://downloads.xiph.org/releases/flac/flac-1.4.2.tar.xz
+  URL_HASH MD5=ca9140f37b286d2571e37d66aae50f92
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_flac)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/flac-1.4.2.tar.xz)
+
+ExternalProject_Add(flac
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/flac-1.4.2
+  INSTALL_DIR ${PREFIX}
+  CONFIGURE_COMMAND autoreconf -fi && ./configure "--host=arm-apple-darwin" "--prefix=" "--disable-shared" "--enable-static" "--disable-doxygen-docs" "--disable-xmms-plugin" "--disable-cpplibs" "--disable-ogg" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make -C src/libFLAC
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make -C src/libFLAC DESTDIR=<INSTALL_DIR> install && make -C include DESTDIR=<INSTALL_DIR> install
 )
