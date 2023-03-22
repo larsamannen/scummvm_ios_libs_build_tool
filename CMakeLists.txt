@@ -242,3 +242,24 @@ ExternalProject_Add(flac
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make -C src/libFLAC DESTDIR=<INSTALL_DIR> install && make -C include DESTDIR=<INSTALL_DIR> install
 )
+
+#libmpeg2
+FetchContent_Declare(_libmpeg2
+  URL https://libmpeg2.sourceforge.net/files/libmpeg2-0.5.1.tar.gz
+  URL_HASH MD5=0f92c7454e58379b4a5a378485bbd8ef
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_libmpeg2)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/libmpeg2-0.5.1.tar.gz)
+
+ExternalProject_Add(libmpeg2
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/libmpeg2-0.5.1
+  INSTALL_DIR ${PREFIX}
+  CONFIGURE_COMMAND autoreconf -fi && ./configure "--host=arm64-apple-darwin" "--prefix=" "--disable-shared" "--enable-static" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make -C libmpeg2
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make -C libmpeg2 DESTDIR=<INSTALL_DIR> install && make -C include DESTDIR=<INSTALL_DIR> install
+)
