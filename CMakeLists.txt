@@ -174,3 +174,25 @@ ExternalProject_Add(libtheora
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
 )
+
+#libvorbis
+FetchContent_Declare(_libvorbis
+  URL https://downloads.xiph.org/releases/vorbis/libvorbis-1.3.7.tar.xz
+  URL_HASH MD5=50902641d358135f06a8392e61c9ac77
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_libvorbis)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/libvorbis-1.3.7.tar.xz)
+
+ExternalProject_Add(libvorbis
+  DEPENDS libogg
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/libvorbis-1.3.7
+  INSTALL_DIR ${PREFIX}
+  CONFIGURE_COMMAND autoreconf -fi -I m4 && PKG_CONFIG_PATH=${PKG_CONFIG_PATH} ./configure "--host=arm64-apple-darwin" "--prefix=" CFLAGS=${DEFAULT_FLAGS}  LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
+)
