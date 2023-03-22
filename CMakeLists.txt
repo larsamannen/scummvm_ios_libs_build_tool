@@ -69,3 +69,24 @@ ExternalProject_Add(libpng16
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install-libLTLIBRARIES install-binSCRIPTS install-pkgconfigDATA install-pkgincludeHEADERS install-nodist_pkgincludeHEADERS install-header-links install-library-links install-libpng-pc install-libpng-config
 )
+
+#giflib
+FetchContent_Declare(_giflib
+  URL https://sourceforge.net/projects/giflib/files/giflib-5.1.9.tar.gz
+  URL_HASH MD5=179336e739eeacee4cef2a8f789a0fcb
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_giflib)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/giflib-5.1.9.tar.gz)
+
+ExternalProject_Add(giflib
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/giflib-5.1.9
+  INSTALL_DIR ${PREFIX}
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make libgif.a OFLAGS=${DEFAULT_FLAGS}
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make DESTDIR=<INSTALL_DIR>/lib install-include && cp -f libgif.a <INSTALL_DIR>/lib
+)
