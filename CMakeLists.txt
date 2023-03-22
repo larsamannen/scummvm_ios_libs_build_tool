@@ -73,6 +73,29 @@ ExternalProject_Add(libpng16
   INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install-libLTLIBRARIES install-binSCRIPTS install-pkgconfigDATA install-pkgincludeHEADERS install-nodist_pkgincludeHEADERS install-header-links install-library-links install-libpng-pc install-libpng-config
 )
 
+#libjpeg-turbo
+FetchContent_Declare(_libjpeg-turbo
+  URL https://sourceforge.net/projects/libjpeg-turbo/files/2.0.6/libjpeg-turbo-2.0.6.tar.gz
+  URL_HASH MD5=4cada3f0bdc93d826fa31bf9e4469ef6
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_libjpeg-turbo)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/libjpeg-turbo-2.0.6.tar.gz)
+
+ExternalProject_Add(libjpeg-turbo
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/libjpeg-turbo-2.0.6
+  INSTALL_DIR ${PREFIX}
+  CMAKE_ARGS
+    -DENABLE_SHARED=0
+    -DWITH_TURBOJPEG=0
+    -DREQUIRE_SIMD=0
+    -DCMAKE_C_FLAGS=${DEFAULT_FLAGS}
+    -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/ios.toolchain.cmake
+  INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
+)
+
 #giflib
 FetchContent_Declare(_giflib
   URL https://sourceforge.net/projects/giflib/files/giflib-5.1.9.tar.gz
