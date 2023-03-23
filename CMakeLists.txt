@@ -350,3 +350,24 @@ add_custom_target(libcurl
   DEPENDS libcurl32 libcurl64
   COMMAND ${LIPO} ${PREFIX}/32/lib/libcurl.a ${PREFIX}/64/lib/libcurl.a -create -output ${PREFIX}/lib/libcurl.a
 )
+
+#freetype
+FetchContent_Declare(_freetype
+  URL https://downloads.sourceforge.net/freetype/freetype-2.13.0.tar.xz
+  URL_HASH MD5=fe73327ebbf0b629f3ad24be656d59de
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_freetype)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/freetype-2.13.0.tar.xz)
+
+ExternalProject_Add(freetype
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/freetype-2.13.0
+  INSTALL_DIR ${PREFIX}
+  CONFIGURE_COMMAND ./configure "--host=arm64-apple-darwin" "--prefix=" "--disable-shared" "--enable-static" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
+)
