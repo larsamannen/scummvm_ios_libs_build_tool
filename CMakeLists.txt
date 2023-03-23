@@ -29,6 +29,8 @@ execute_process(COMMAND ${XCRUN_EXECUTABLE} --sdk ${SDK_NAME} --show-sdk-path
 
 set(PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/libs)
 set(DEFAULT_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch arm64 -arch armv7 -arch armv7s -I${PREFIX}/include -L${PREFIX}/lib")
+set(DEFAULT_32_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch armv7 -arch armv7s -I${PREFIX}/include -L${PREFIX}/lib")
+set(DEFAULT_64_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch arm64 -I${PREFIX}/include -L${PREFIX}/lib")
 set(PKG_CONFIG_PATH ${PREFIX}/lib/pkgconfig/)
 
 #bzip2
@@ -316,4 +318,35 @@ find_program (LIPO lipo REQUIRED)
 add_custom_target(libvpx
   DEPENDS libvpxarm64-darwin-gcc libvpxarmv7-darwin-gcc libvpxarmv7s-darwin-gcc
   COMMAND ${LIPO} ${PREFIX}/arm64-darwin-gcc/lib/libvpx.a ${PREFIX}/armv7-darwin-gcc/lib/libvpx.a ${PREFIX}/armv7s-darwin-gcc/lib/libvpx.a -create -output ${PREFIX}/lib/libvpx.a
+)
+
+#libcurl
+FetchContent_Declare(_libcurl
+  URL https://curl.se/download/curl-7.88.1.tar.xz
+  URL_HASH MD5=8bea0c58428578f397471fe209fad6ab
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_libcurl)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/curl-7.88.1.tar.xz)
+
+set(CPUS "32" "64")
+
+foreach(CPU IN LISTS CPUS)
+  ExternalProject_Add(libcurl${CPU}
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/curl-7.88.1
+    INSTALL_DIR ${PREFIX}
+    CONFIGURE_COMMAND autoreconf -fi -I m4 && ./configure --host=arm-apple-darwin --disable-shared --enable-static --with-secure-transport --disable-ntlm-wb --prefix= CFLAGS=${DEFAULT_${CPU}_FLAGS} LDFLAGS=${DEFAULT_${CPU}_FLAGS}
+    BUILD_COMMAND ${CMAKE_COMMAND} -E env
+    make clean && make -C lib
+    BUILD_IN_SOURCE TRUE
+    INSTALL_COMMAND make DESTDIR=<INSTALL_DIR>/${CPU} -C lib install && make DESTDIR=<INSTALL_DIR> -C include install
+  )
+endforeach()
+
+# Create a fat library. This will assume that libs/lib folder exist so it has to be crated
+add_custom_target(libcurl
+  DEPENDS libcurl32 libcurl64
+  COMMAND ${LIPO} ${PREFIX}/32/lib/libcurl.a ${PREFIX}/64/lib/libcurl.a -create -output ${PREFIX}/lib/libcurl.a
 )
