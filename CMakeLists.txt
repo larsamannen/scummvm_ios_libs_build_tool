@@ -284,3 +284,36 @@ ExternalProject_Add(liba52dec
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make -C liba52 DESTDIR=<INSTALL_DIR> install && make -C include DESTDIR=<INSTALL_DIR> install
 )
+
+#libvpx
+FetchContent_Declare(_libvpx
+  URL https://github.com/webmproject/libvpx/archive/v1.13.0/libvpx-1.13.0.tar.gz
+  URL_HASH MD5=d5fd45a806a65a57d6635f9e7a98a1b2
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_libvpx)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/libvpx-1.13.0.tar.gz)
+
+set(TARGETS "arm64-darwin-gcc" "armv7-darwin-gcc" "armv7s-darwin-gcc")
+
+foreach(TARGET IN LISTS TARGETS)
+  ExternalProject_Add(libvpx${TARGET}
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/libvpx-1.13.0
+    INSTALL_DIR ${PREFIX}
+    CONFIGURE_COMMAND prefix="" ./configure "--target=${TARGET}" "--disable-shared" "--enable-static" "--disable-examples" "--disable-tools" "--disable-docs" "--disable-unit-tests" "--disable-install-bins" "--disable-install-srcs" "--size-limit=16384x16384" "--disable-vp8-encoder" "--disable-vp9-encoder"
+    BUILD_COMMAND ${CMAKE_COMMAND} -E env
+    make clean && make
+    BUILD_IN_SOURCE TRUE
+    INSTALL_COMMAND make DESTDIR=<INSTALL_DIR>/${TARGET} install
+  )
+endforeach()
+
+find_program (LIPO lipo REQUIRED)
+
+# Create a fat library. This will assume that libs/lib folder exist so it has to be crated
+add_custom_target(libvpx
+  DEPENDS libvpxarm64-darwin-gcc libvpxarmv7-darwin-gcc libvpxarmv7s-darwin-gcc
+  COMMAND ${LIPO} ${PREFIX}/arm64-darwin-gcc/lib/libvpx.a ${PREFIX}/armv7-darwin-gcc/lib/libvpx.a ${PREFIX}/armv7s-darwin-gcc/lib/libvpx.a -create -output ${PREFIX}/lib/libvpx.a
+)
