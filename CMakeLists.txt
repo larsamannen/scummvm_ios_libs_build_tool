@@ -10,10 +10,9 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
  	cmake_policy(SET CMP0135 NEW)
 endif()
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
-
 include(FetchContent)
 include(ExternalProject)
+set(FETCHCONTENT_QUIET FALSE)
 
 find_program(XCRUN_EXECUTABLE xcrun)
 if(NOT XCRUN_EXECUTABLE)
