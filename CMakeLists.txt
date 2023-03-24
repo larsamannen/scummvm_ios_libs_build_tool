@@ -447,3 +447,24 @@ ExternalProject_Add(gettext
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make -C gettext-runtime/intl DESTDIR=<INSTALL_DIR> install
 )
+
+#glib2.0
+FetchContent_Declare(_glib
+  URL https://download.gnome.org/sources/glib/2.74/glib-2.74.6.tar.xz
+  URL_HASH MD5=38f81d4a06c03e667b1f4d73cb803da8
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_glib)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/glib-2.74.6.tar.xz)
+
+ExternalProject_Add(gettext
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/glib-2.74.6
+  INSTALL_DIR ${PREFIX}
+  CONFIGURE_COMMAND autoreconf -vfi && ./configure "--host=arm64-apple-darwin" "--prefix=" "--disable-shared" "--enable-static" "--disable-libasprintf" "--disable-java" "--disable-c++" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make -C gettext-runtime/intl
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make -C gettext-runtime/intl DESTDIR=<INSTALL_DIR> install
+)
