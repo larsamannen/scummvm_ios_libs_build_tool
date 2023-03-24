@@ -391,3 +391,17 @@ ExternalProject_Add(fribidi
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
 )
+
+#libsdl2-net
+ExternalProject_Add(libsdl2-net
+  GIT_REPOSITORY https://github.com/libsdl-org/SDL_net.git
+  GIT_SHALLOW TRUE
+  GIT_TAG release-2.0.1
+  INSTALL_DIR ${PREFIX}
+  PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/patches/no-sdl.patch ${CMAKE_CURRENT_SOURCE_DIR}/patches/stub-showinterfaces.patch  <SOURCE_DIR> && patch -p1 < <SOURCE_DIR>/no-sdl.patch && patch -p1 < <SOURCE_DIR>/stub-showinterfaces.patch
+  CONFIGURE_COMMAND ./autogen.sh && ./configure "--host=arm-apple-darwin" "--prefix=" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make  DESTDIR=<INSTALL_DIR> install
+)

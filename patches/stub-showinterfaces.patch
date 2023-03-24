@@ -1,0 +1,41 @@
+From 8a258a915acbbedf26a71d705121ec3f9abe5ace Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lars=20Sundstr=C3=B6m?= <lars.sundstrom@audiodo.com>
+Date: Fri, 24 Mar 2023 09:50:15 +0100
+Subject: [PATCH] Stub showinterfaces
+
+showinterfaces.c indirectly includes SDL_main.h which #defines main to
+SDL_main when __ANDROID__ is defined, so it won't compile in the usual
+manner, so just stub it out
+---
+ showinterfaces.c | 15 +--------------
+ 1 file changed, 1 insertion(+), 14 deletions(-)
+
+diff --git a/showinterfaces.c b/showinterfaces.c
+index c3ab01b..fc02ab4 100644
+--- a/showinterfaces.c
++++ b/showinterfaces.c
+@@ -22,20 +22,7 @@
+ 
+ #define MAX_ADDRESSES   10
+ 
+-int main(int argc, char *argv[])
++int main()
+ {
+-    IPaddress addresses[MAX_ADDRESSES];
+-    int i, count;
+-
+-    count = SDLNet_GetLocalAddresses(addresses, MAX_ADDRESSES);
+-    SDL_Log("Found %d local addresses", count);
+-    for ( i = 0; i < count; ++i ) {
+-        SDL_Log("%d: %d.%d.%d.%d - %s", i+1,
+-            (addresses[i].host >> 0) & 0xFF,
+-            (addresses[i].host >> 8) & 0xFF,
+-            (addresses[i].host >> 16) & 0xFF,
+-            (addresses[i].host >> 24) & 0xFF,
+-            SDLNet_ResolveIP(&addresses[i]));
+-    }
+     return 0;
+ }
+-- 
+2.37.1 (Apple Git-137.1)
+
