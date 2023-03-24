@@ -371,3 +371,24 @@ ExternalProject_Add(freetype
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
 )
+
+#fribidi
+FetchContent_Declare(_fribidi
+  URL https://github.com/fribidi/fribidi/releases/download/v1.0.12/fribidi-1.0.12.tar.xz
+  URL_HASH MD5=21185b398635a7fc0d3ff0a7578c4791
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_fribidi)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/fribidi-1.0.12.tar.xz)
+
+ExternalProject_Add(fribidi
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/fribidi-1.0.12
+  INSTALL_DIR ${PREFIX}
+  CONFIGURE_COMMAND NOCONFIGURE=1 ./autogen.sh && ./configure "--host=arm64-apple-darwin" "--prefix=" "--disable-shared" "--enable-static" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
+)
