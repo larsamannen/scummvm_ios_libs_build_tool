@@ -426,3 +426,24 @@ ExternalProject_Add(libffi
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make -C include DESTDIR=<INSTALL_DIR> install && make DESTDIR=<INSTALL_DIR> install-pkgconfigDATA install-toolexeclibLTLIBRARIES
 )
+
+#gettext
+FetchContent_Declare(_gettext
+  URL https://ftp.gnu.org/pub/gnu/gettext/gettext-0.21.1.tar.gz
+  URL_HASH MD5=83fb74df9fac4d073497cecb0fe17e8b
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_gettext)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/gettext-0.21.1.tar.gz)
+
+ExternalProject_Add(gettext
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/gettext-0.21.1
+  INSTALL_DIR ${PREFIX}
+  CONFIGURE_COMMAND autoreconf -vfi && ./configure "--host=arm64-apple-darwin" "--prefix=" "--disable-shared" "--enable-static" "--disable-libasprintf" "--disable-java" "--disable-c++" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make -C gettext-runtime/intl
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make -C gettext-runtime/intl DESTDIR=<INSTALL_DIR> install
+)
