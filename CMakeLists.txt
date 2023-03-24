@@ -405,3 +405,24 @@ ExternalProject_Add(libsdl2-net
   BUILD_IN_SOURCE TRUE
   INSTALL_COMMAND make  DESTDIR=<INSTALL_DIR> install
 )
+
+#libffi
+FetchContent_Declare(_libffi
+  URL https://github.com/libffi/libffi/releases/download/v3.4.4/libffi-3.4.4.tar.gz
+  URL_HASH MD5=0da1a5ed7786ac12dcbaf0d499d8a049
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_libffi)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/libffi-3.4.4.tar.gz)
+
+ExternalProject_Add(libffi
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/libffi-3.4.4
+  INSTALL_DIR ${PREFIX}
+  CONFIGURE_COMMAND ./configure "--host=arm64-apple-darwin" "--prefix=" "--disable-shared" "--enable-static" "--disable-builddir" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make
+  BUILD_IN_SOURCE TRUE
+  INSTALL_COMMAND make -C include DESTDIR=<INSTALL_DIR> install && make DESTDIR=<INSTALL_DIR> install-pkgconfigDATA install-toolexeclibLTLIBRARIES
+)
