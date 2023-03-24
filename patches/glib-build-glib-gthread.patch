@@ -1,0 +1,29 @@
+From 9d389b0300eaf661280ea3aa99efefa2168cbf27 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lars=20Sundstr=C3=B6m?= <lars.sundstrom@audiodo.com>
+Date: Fri, 24 Mar 2023 18:39:57 +0100
+Subject: [PATCH] glib build only glib and gthread
+
+---
+ meson.build | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index c8e986510..effa07d3a 100644
+--- a/meson.build
++++ b/meson.build
+@@ -2394,12 +2394,7 @@ test_timeout_slow = 180
+ pkg = import('pkgconfig')
+ windows = import('windows')
+ subdir('glib')
+-subdir('gobject')
+ subdir('gthread')
+-subdir('gmodule')
+-subdir('gio')
+-subdir('fuzzing')
+-subdir('tools')
+ 
+ # xgettext is optional (on Windows for instance)
+ if find_program('xgettext', required : get_option('nls')).found()
+-- 
+2.37.1 (Apple Git-137.1)
+

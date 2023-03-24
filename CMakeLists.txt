@@ -29,7 +29,10 @@ execute_process(COMMAND ${XCRUN_EXECUTABLE} --sdk ${SDK_NAME} --show-sdk-path
 set(PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/libs)
 set(DEFAULT_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch arm64 -arch armv7 -arch armv7s -I${PREFIX}/include -L${PREFIX}/lib")
 set(DEFAULT_32_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch armv7 -arch armv7s -I${PREFIX}/include -L${PREFIX}/lib")
+set(DEFAULT_arm64_GLIB_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch arm64 -I${PREFIX}/include -L${PREFIX}/lib -framework CoreFoundation")
 set(DEFAULT_64_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch arm64 -I${PREFIX}/include -L${PREFIX}/lib")
+set(DEFAULT_armv7_GLIB_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch armv7 -I${PREFIX}/include -L${PREFIX}/lib -framework CoreFoundation")
+set(DEFAULT_armv7s_GLIB_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch armv7s -I${PREFIX}/include -L${PREFIX}/lib -framework CoreFoundation")
 set(PKG_CONFIG_PATH ${PREFIX}/lib/pkgconfig/)
 
 #bzip2
@@ -449,6 +452,8 @@ ExternalProject_Add(gettext
 )
 
 #glib2.0
+find_program (MESON meson REQUIRED)
+
 FetchContent_Declare(_glib
   URL https://download.gnome.org/sources/glib/2.74/glib-2.74.6.tar.xz
   URL_HASH MD5=38f81d4a06c03e667b1f4d73cb803da8
@@ -459,12 +464,26 @@ FetchContent_Declare(_glib
 FetchContent_MakeAvailable(_glib)
 file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/glib-2.74.6.tar.xz)
 
-ExternalProject_Add(gettext
-  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/glib-2.74.6
-  INSTALL_DIR ${PREFIX}
-  CONFIGURE_COMMAND autoreconf -vfi && ./configure "--host=arm64-apple-darwin" "--prefix=" "--disable-shared" "--enable-static" "--disable-libasprintf" "--disable-java" "--disable-c++" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
-  BUILD_COMMAND ${CMAKE_COMMAND} -E env
-  make -C gettext-runtime/intl
-  BUILD_IN_SOURCE TRUE
-  INSTALL_COMMAND make -C gettext-runtime/intl DESTDIR=<INSTALL_DIR> install
+set(ARCHS "arm64" "armv7" "armv7s")
+
+foreach(ARCH IN LISTS ARCHS)
+  ExternalProject_Add(glib${ARCH}
+    DEPENDS libffi gettext
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/glib-2.74.6
+    INSTALL_DIR ${PREFIX}
+    PATCH_COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/patches/glib-build-glib-gthread.patch <SOURCE_DIR> && patch -Np1 < <SOURCE_DIR>/glib-build-glib-gthread.patch || true
+    CONFIGURE_COMMAND cmake -E env PKG_CONFIG_PATH=${PKG_CONFIG_PATH} CFLAGS=${DEFAULT_${ARCH}_GLIB_FLAGS} LDFLAGS=${DEFAULT_${ARCH}_GLIB_FLAGS}
+    ${MESON} setup --cross-file ${CMAKE_CURRENT_SOURCE_DIR}/ios.ini --prefix=${PREFIX}/${ARCH} --buildtype release --default-library static _build${ARCH}
+    BUILD_COMMAND ${CMAKE_COMMAND} -E env
+    ninja -C _build${ARCH}
+    BUILD_IN_SOURCE TRUE
+    INSTALL_COMMAND ninja -C _build${ARCH} install all
+  )
+endforeach()
+
+# Create a fat library. This will assume that libs/lib folder exist so it has to be crated
+add_custom_target(glib
+  DEPENDS glibarm64 glibarmv7 glibarmv7s
+  COMMAND ${LIPO} ${PREFIX}/arm64/lib/libglib-2.0.a ${PREFIX}/armv7/lib/libglib-2.0.a ${PREFIX}/armv7s/lib/libglib-2.0.a -create -output ${PREFIX}/lib/libglib-2.0.a
+  COMMAND cp -r ${PREFIX}/arm64/include/glib-2.0 ${PREFIX}/include
 )
