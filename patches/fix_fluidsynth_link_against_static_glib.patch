@@ -1,0 +1,53 @@
+From db5ce5945a99631db8ea7e040a73dcdd3be268c2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lars=20Sundstr=C3=B6m?= <lars.sundstrom@audiodo.com>
+Date: Tue, 28 Mar 2023 10:48:10 +0200
+Subject: [PATCH] fix_fluidsynt_link_against_static_glib
+
+---
+ CMakeLists.txt     | 4 ++--
+ src/CMakeLists.txt | 6 ++++--
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8699d53c..216611ab 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -481,9 +481,9 @@ find_package ( PkgConfig REQUIRED )
+ pkg_check_modules ( GLIB REQUIRED glib-2.0>=2.6.5 gthread-2.0>=2.6.5 IMPORTED_TARGET )
+ list( APPEND PC_REQUIRES_PRIV "glib-2.0" "gthread-2.0")
+ 
+-if ( GLIB_glib-2.0_VERSION AND GLIB_glib-2.0_VERSION VERSION_LESS "2.26.0" )
++if ( GLIB_STATIC_glib-2.0_VERSION AND GLIB_STATIC_glib-2.0_VERSION VERSION_LESS "2.26.0" )
+     message ( WARNING "Your version of glib is very old. This may cause problems with fluidsynth's sample cache on Windows. Consider updating to glib 2.26 or newer!" )
+-endif ( GLIB_glib-2.0_VERSION AND GLIB_glib-2.0_VERSION VERSION_LESS "2.26.0" )
++endif ( GLIB_STATIC_glib-2.0_VERSION AND GLIB_STATIC_glib-2.0_VERSION VERSION_LESS "2.26.0" )
+ 
+ include ( PkgConfigHelpers ) # has unset_pkg_config()
+ 
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index e86a6429..508390a7 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -350,8 +350,8 @@ endif()
+ if ( TARGET PkgConfig::GLIB )
+     target_link_libraries ( libfluidsynth-OBJ PUBLIC PkgConfig::GLIB )
+ else()
+-    target_include_directories ( libfluidsynth-OBJ PUBLIC ${GLIB_INCLUDE_DIRS} )
+-    target_link_libraries ( libfluidsynth-OBJ PUBLIC ${GLIB_LIBRARIES} )
++    target_include_directories ( libfluidsynth-OBJ PUBLIC ${GLIB_STATIC_INCLUDE_DIRS} )
++    target_link_libraries ( libfluidsynth-OBJ PUBLIC ${GLIB_STATIC_LIBRARIES} )
+ endif()
+ 
+ if ( TARGET PkgConfig::LIBSNDFILE AND LIBSNDFILE_SUPPORT )
+@@ -448,6 +448,8 @@ add_executable ( fluidsynth
+     ${fluidsynth_SOURCES}
+ )
+ 
++target_link_options ( fluidsynth PRIVATE ${GLIB_STATIC_LDFLAGS_OTHER} )
++
+ set_target_properties ( fluidsynth
+     PROPERTIES IMPORT_PREFIX "" )
+ 
+-- 
+2.37.1 (Apple Git-137.1)
+

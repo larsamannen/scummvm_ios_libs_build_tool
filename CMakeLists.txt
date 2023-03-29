@@ -19,7 +19,7 @@ if(NOT XCRUN_EXECUTABLE)
   message(FATAL_ERROR "xcrun not found. Please install either the standalone commandline tools or Xcode.")
 endif()
 
-set(SDK_NAME iphoneos)
+set(SDK_NAME iphonesimulator)
 
 execute_process(COMMAND ${XCRUN_EXECUTABLE} --sdk ${SDK_NAME} --show-sdk-path
   OUTPUT_VARIABLE CMAKE_OSX_SYSROOT_INT
@@ -27,12 +27,9 @@ execute_process(COMMAND ${XCRUN_EXECUTABLE} --sdk ${SDK_NAME} --show-sdk-path
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 set(PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/libs)
-set(DEFAULT_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch arm64 -arch armv7 -arch armv7s -I${PREFIX}/include -L${PREFIX}/lib")
-set(DEFAULT_32_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch armv7 -arch armv7s -I${PREFIX}/include -L${PREFIX}/lib")
-set(DEFAULT_arm64_GLIB_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch arm64 -I${PREFIX}/include -L${PREFIX}/lib -framework CoreFoundation")
-set(DEFAULT_64_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch arm64 -I${PREFIX}/include -L${PREFIX}/lib")
-set(DEFAULT_armv7_GLIB_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch armv7 -I${PREFIX}/include -L${PREFIX}/lib -framework CoreFoundation")
-set(DEFAULT_armv7s_GLIB_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -miphoneos-version-min=7.0 -arch armv7s -I${PREFIX}/include -L${PREFIX}/lib -framework CoreFoundation")
+set(DEFAULT_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -mios-simulator-version-min=7.0 -arch arm64 -I${PREFIX}/include -L${PREFIX}/lib")
+set(DEFAULT_arm64_GLIB_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -mios-simulator-version-min=7.0 -arch arm64 -I${PREFIX}/include -L${PREFIX}/lib -framework CoreFoundation")
+set(DEFAULT_64_FLAGS "${CMAKE_C_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT_INT} -mios-simulator-version-min=7.0 -arch arm64 -I${PREFIX}/include -L${PREFIX}/lib")
 set(PKG_CONFIG_PATH ${PREFIX}/lib/pkgconfig/)
 
 #bzip2
@@ -300,46 +297,46 @@ FetchContent_Declare(_libvpx
 FetchContent_MakeAvailable(_libvpx)
 file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/libvpx-1.13.0.tar.gz)
 
-set(TARGETS "arm64-darwin-gcc" "armv7-darwin-gcc" "armv7s-darwin-gcc")
+#set(TARGETS "arm64-darwin-gcc" "armv7-darwin-gcc" "armv7s-darwin-gcc")
 
-foreach(TARGET IN LISTS TARGETS)
-  ExternalProject_Add(libvpx${TARGET}
-    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/libvpx-1.13.0
-    INSTALL_DIR ${PREFIX}
-    CONFIGURE_COMMAND prefix="" ./configure "--target=${TARGET}" "--disable-shared" "--enable-static" "--disable-examples" "--disable-tools" "--disable-docs" "--disable-unit-tests" "--disable-install-bins" "--disable-install-srcs" "--size-limit=16384x16384" "--disable-vp8-encoder" "--disable-vp9-encoder"
-    BUILD_COMMAND ${CMAKE_COMMAND} -E env
-    make clean && make
-    BUILD_IN_SOURCE TRUE
-    INSTALL_COMMAND make DESTDIR=<INSTALL_DIR>/${TARGET} install
-  )
-endforeach()
+#foreach(TARGET IN LISTS TARGETS)
+#  ExternalProject_Add(libvpx${TARGET}
+#    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/libvpx-1.13.0
+#    INSTALL_DIR ${PREFIX}
+#    CONFIGURE_COMMAND prefix="" ./configure "--target=${TARGET}" "--disable-shared" "--enable-static" "--disable-examples" "--disable-tools" "--disable-docs" "--disable-unit-tests" "--disable-install-bins" "--disable-install-srcs" "--size-limit=16384x16384" "--disable-vp8-encoder" "--disable-vp9-encoder"
+#    BUILD_COMMAND ${CMAKE_COMMAND} -E env
+#    make clean && make
+#    BUILD_IN_SOURCE TRUE
+#    INSTALL_COMMAND make DESTDIR=<INSTALL_DIR>/${TARGET} install
+#  )
+#endforeach()
 
-find_program (LIPO lipo REQUIRED)
+#find_program (LIPO lipo REQUIRED)
 
 # Create a fat library. This will assume that libs/lib folder exist so it has to be crated
-add_custom_target(libvpx
-  DEPENDS libvpxarm64-darwin-gcc libvpxarmv7-darwin-gcc libvpxarmv7s-darwin-gcc
-  COMMAND ${LIPO} ${PREFIX}/arm64-darwin-gcc/lib/libvpx.a ${PREFIX}/armv7-darwin-gcc/lib/libvpx.a ${PREFIX}/armv7s-darwin-gcc/lib/libvpx.a -create -output ${PREFIX}/lib/libvpx.a
-)
+#add_custom_target(libvpx
+#  DEPENDS libvpxarm64-darwin-gcc libvpxarmv7-darwin-gcc libvpxarmv7s-darwin-gcc
+#  COMMAND ${LIPO} ${PREFIX}/arm64-darwin-gcc/lib/libvpx.a ${PREFIX}/armv7-darwin-gcc/lib/l#ibvpx.a ${PREFIX}/armv7s-darwin-gcc/lib/libvpx.a -create -output ${PREFIX}/lib/libvpx.a
+#)
 
 #libcurl
 FetchContent_Declare(_libcurl
-  URL https://curl.se/download/curl-7.88.1.tar.xz
-  URL_HASH MD5=8bea0c58428578f397471fe209fad6ab
+  URL https://curl.se/download/curl-7.74.0.tar.xz
+  URL_HASH MD5=448156d9cd05009b0097b43de639fd34
   DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
   DOWNLOAD_NO_EXTRACT TRUE
   TLS_VERIFY TRUE
 )
 FetchContent_MakeAvailable(_libcurl)
-file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/curl-7.88.1.tar.xz)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/curl-7.74.0.tar.xz)
 
-set(CPUS "32" "64")
+set(CPUS "64")
 
 foreach(CPU IN LISTS CPUS)
   ExternalProject_Add(libcurl${CPU}
-    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/curl-7.88.1
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/curl-7.74.0
     INSTALL_DIR ${PREFIX}
-    CONFIGURE_COMMAND autoreconf -fi -I m4 && ./configure --host=arm-apple-darwin --disable-shared --enable-static --with-secure-transport --disable-ntlm-wb --prefix= CFLAGS=${DEFAULT_${CPU}_FLAGS} LDFLAGS=${DEFAULT_${CPU}_FLAGS}
+    CONFIGURE_COMMAND autoreconf -fi -I m4 && ./configure --host=arm-apple-darwin --disable-shared --enable-static --with-secure-transport --disable-ntlm-wb --without-zstd --prefix= CFLAGS=${DEFAULT_${CPU}_FLAGS} LDFLAGS=${DEFAULT_${CPU}_FLAGS}
     BUILD_COMMAND ${CMAKE_COMMAND} -E env
     make clean && make -C lib
     BUILD_IN_SOURCE TRUE
@@ -349,8 +346,8 @@ endforeach()
 
 # Create a fat library. This will assume that libs/lib folder exist so it has to be crated
 add_custom_target(libcurl
-  DEPENDS libcurl32 libcurl64
-  COMMAND ${LIPO} ${PREFIX}/32/lib/libcurl.a ${PREFIX}/64/lib/libcurl.a -create -output ${PREFIX}/lib/libcurl.a
+  DEPENDS  libcurl64
+#  COMMAND ${LIPO} ${PREFIX}/32/lib/libcurl.a ${PREFIX}/64/lib/libcurl.a -create -output ${PREFIX}/lib/libcurl.a
 )
 
 #freetype
@@ -367,7 +364,7 @@ file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/freetype-2.13.0.tar.xz)
 ExternalProject_Add(freetype
   SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/freetype-2.13.0
   INSTALL_DIR ${PREFIX}
-  CONFIGURE_COMMAND ./configure "--host=arm64-apple-darwin" "--prefix=" "--disable-shared" "--enable-static" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
+  CONFIGURE_COMMAND ./configure "--host=arm64-apple-darwin" "--prefix=" "--disable-shared" "--enable-static" "--with-harfbuzz=no" CFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS}
   BUILD_COMMAND ${CMAKE_COMMAND} -E env
   make
   BUILD_IN_SOURCE TRUE
@@ -455,26 +452,26 @@ ExternalProject_Add(gettext
 find_program (MESON meson REQUIRED)
 
 FetchContent_Declare(_glib
-  URL https://download.gnome.org/sources/glib/2.74/glib-2.74.6.tar.xz
-  URL_HASH MD5=38f81d4a06c03e667b1f4d73cb803da8
+  URL https://download.gnome.org/sources/glib/2.66/glib-2.66.8.tar.xz
+  URL_HASH MD5=705dd46a43d339e8aea19e946e71c32a
   DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
   DOWNLOAD_NO_EXTRACT TRUE
   TLS_VERIFY TRUE
 )
 FetchContent_MakeAvailable(_glib)
-file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/glib-2.74.6.tar.xz)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/glib-2.66.8.tar.xz)
 
-set(ARCHS "arm64" "armv7" "armv7s")
+set(ARCHS "arm64")
 
 foreach(ARCH IN LISTS ARCHS)
   ExternalProject_Add(glib${ARCH}
     DEPENDS libffi gettext
-    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/glib-2.74.6
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/glib-2.66.8
     INSTALL_DIR ${PREFIX}
-    PATCH_COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/patches/glib-build-glib-gthread.patch <SOURCE_DIR> && patch -Np1 < <SOURCE_DIR>/glib-build-glib-gthread.patch || true
-    CONFIGURE_COMMAND cmake -E env PKG_CONFIG_PATH=${PKG_CONFIG_PATH} CFLAGS=${DEFAULT_${ARCH}_GLIB_FLAGS} LDFLAGS=${DEFAULT_${ARCH}_GLIB_FLAGS}
-    ${MESON} setup --cross-file ${CMAKE_CURRENT_SOURCE_DIR}/ios.ini --prefix=${PREFIX}/${ARCH} --buildtype release --default-library static _build${ARCH}
-    BUILD_COMMAND ${CMAKE_COMMAND} -E env
+    PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/patches/meson-Fix-detection-of-static-libintl-on-macOS.patch ${CMAKE_CURRENT_SOURCE_DIR}/patches/fix-linkage-on-intl.patch ${CMAKE_CURRENT_SOURCE_DIR}/patches/only-keep-glib-and-gthread.patch <SOURCE_DIR> && patch -Np1 < <SOURCE_DIR>/meson-Fix-detection-of-static-libintl-on-macOS.patch || true && patch -Np1 < <SOURCE_DIR>/fix-linkage-on-intl.patch || true && patch -Np1 < <SOURCE_DIR>/only-keep-glib-and-gthread.patch || true
+    CONFIGURE_COMMAND cmake -E env PKG_CONFIG_PATH=${PKG_CONFIG_PATH} CFLAGS=${DEFAULT_${ARCH}_GLIB_FLAGS} LDFLAGS=${DEFAULT_${ARCH}_GLIB_FLAGS} LIBRARY_PATH=${PREFIX}/lib
+    ${MESON} setup --cross-file ${CMAKE_CURRENT_SOURCE_DIR}/ios.ini --prefix=${PREFIX}/${ARCH} --buildtype release --default-library static -Dinternal_pcre=true _build${ARCH}
+    BUILD_COMMAND ${CMAKE_COMMAND} -E env CFLAGS=${DEFAULT_${ARCH}_GLIB_FLAGS} LDFLAGS=${DEFAULT_${ARCH}_GLIB_FLAGS}
     ninja -C _build${ARCH}
     BUILD_IN_SOURCE TRUE
     INSTALL_COMMAND ninja -C _build${ARCH} install all
@@ -483,7 +480,55 @@ endforeach()
 
 # Create a fat library. This will assume that libs/lib folder exist so it has to be crated
 add_custom_target(glib
-  DEPENDS glibarm64 glibarmv7 glibarmv7s
-  COMMAND ${LIPO} ${PREFIX}/arm64/lib/libglib-2.0.a ${PREFIX}/armv7/lib/libglib-2.0.a ${PREFIX}/armv7s/lib/libglib-2.0.a -create -output ${PREFIX}/lib/libglib-2.0.a
-  COMMAND cp -r ${PREFIX}/arm64/include/glib-2.0 ${PREFIX}/include
+  DEPENDS glibarm64
+#  COMMAND ${LIPO} ${PREFIX}/arm64/lib/libglib-2.0.a ${PREFIX}/armv7/lib/libglib-2.0.a ${PREFIX}/armv7s/lib/libglib-2.0.a -create -output ${PREFIX}/lib/libglib-2.0.a
+  COMMAND cp -r ${PREFIX}/arm64/include/glib-2.0 ${PREFIX}/include && cp -r ${PREFIX}/arm64/lib/pkgconfig/* ${PKG_CONFIG_PATH}
 )
+
+#fluidsynth
+FetchContent_Declare(_fluidsynth
+  URL https://github.com/FluidSynth/fluidsynth/archive/refs/tags/v2.3.1.tar.gz
+  URL_HASH MD5=7025da39fde375854bfb19ed38b7ee79
+  DOWNLOAD_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  DOWNLOAD_NO_EXTRACT TRUE
+  TLS_VERIFY TRUE
+)
+FetchContent_MakeAvailable(_fluidsynth)
+file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/v2.3.1.tar.gz)
+
+ExternalProject_Add(fluidsynth
+  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/fluidsynth-2.3.1
+  INSTALL_DIR ${PREFIX}
+  PATCH_COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/patches/fix_fluidsynth_link_against_static_glib.patch <SOURCE_DIR> && patch -p1 < <SOURCE_DIR>/fix_fluidsynth_link_against_static_glib.patch
+  CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_PATH=${PKG_CONFIG_PATH} CFLAGS=${DEFAULT_FLAGS} CXXFLAGS=${DEFAULT_FLAGS} LDFLAGS=${DEFAULT_FLAGS} LIBRARY_PATH=${PREFIX}/lib ${CMAKE_COMMAND} -S <SOURCE_DIR> -Denable-aufile=off -Denable-dbus=off -Denable-network=off -Denable-jack=off  -Denable-libsndfile=off -Denable-midishare=off -Denable-opensles=off -Denable-oboe=off -Denable-oss=off -Denable-dsound=off -Denable-waveout=off -Denable-winmidi=off -Denable-sdl2=off -Denable-pulseaudio=off -Denable-readline=off -Denable-lash=off -Denable-alsa=off -Denable-systemd=off -Denable-coreaudio=off -Denable-coremidi=off -Denable-framework=off -DBUILD_SHARED_LIBS=off -DLIB_SUFFIX= -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/ios.toolchain.cmake
+  BUILD_COMMAND ${CMAKE_COMMAND} -E env
+  make
+  INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
+)
+
+#ExternalProject_Add(fluidsynth
+#  SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/fluidsynth-2.3.1
+#  INSTALL_DIR ${PREFIX}
+#  CMAKE_ARGS
+#  -Denable-aufile=off -Denable-dbus=off
+#  -Denable-network=off -Denable-jack=off
+#  -Denable-ladspa=off -Denable-libinstpatch=off
+#  -Denable-libsndfile=off -Denable-midishare=off
+#  -Denable-opensles=off -Denable-oboe=off
+#  -Denable-oss=off -Denable-dsound=off
+#  -Denable-waveout=off -Denable-winmidi=off
+#  -Denable-sdl2=off -Denable-pulseaudio=off
+#  -Denable-readline=off -Denable-lash=off
+#  -Denable-alsa=off -Denable-systemd=off
+#  -Denable-coreaudio=off -Denable-coremidi=off
+#  -Denable-framework=off -Denable-dart=off
+#  -DBUILD_SHARED_LIBS=off
+#  -DLIB_SUFFIX=
+#  -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/ios.toolchain.cmake
+#  -DCMAKE_C_FLAGS=${DEFAULT_FLAGS}
+#  -DCMAKE_CXX_FLAGS=${DEFAULT_FLAGS}
+#  -DCMAKE_EXE_LINKER_FLAGS=${DEFAULT_FLAGS}
+#  -DCMAKE_INSTALL_PREFIX=${PREFIX}
+#  -DCMAKE_INSTALL_LIBDIR=""
+#  INSTALL_COMMAND make DESTDIR=<INSTALL_DIR> install
+#)

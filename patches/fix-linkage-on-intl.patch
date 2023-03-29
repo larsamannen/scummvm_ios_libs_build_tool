@@ -1,0 +1,26 @@
+From 60555ff664ab82b89f5ab9fa5081fd041376e0e4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lars=20Sundstr=C3=B6m?= <lars.sundstrom@audiodo.com>
+Date: Tue, 28 Mar 2023 10:31:37 +0200
+Subject: [PATCH] 2
+
+---
+ meson.build | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/meson.build b/meson.build
+index 7022e85ca..429352318 100644
+--- a/meson.build
++++ b/meson.build
+@@ -766,6 +766,9 @@ if host_system == 'darwin'
+   # know which language flags it's going to use to link. Add to both languages
+   # for now. See https://github.com/mesonbuild/meson/issues/3585.
+   add_project_link_arguments(osx_ldflags, language : ['objc', 'c'])
++elif host_system == 'ios'
++  osx_ldflags += ['-Wl,-framework,CoreFoundation']
++  add_project_link_arguments(osx_ldflags, language : ['c'])
+ endif
+ 
+ # Check for futex(2)
+-- 
+2.37.1 (Apple Git-137.1)
+

@@ -1,0 +1,63 @@
+From 612375aee534a49f59e02022e0f3c7f5ab50828c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lars=20Sundstr=C3=B6m?= <lars.sundstrom@audiodo.com>
+Date: Tue, 28 Mar 2023 10:34:02 +0200
+Subject: [PATCH] 3
+
+---
+ glib/meson.build | 16 ++++++----------
+ meson.build      |  7 -------
+ 2 files changed, 6 insertions(+), 17 deletions(-)
+
+diff --git a/glib/meson.build b/glib/meson.build
+index 7a35b7d51..09cb1c304 100644
+--- a/glib/meson.build
++++ b/glib/meson.build
+@@ -432,12 +432,12 @@ if host_system == 'windows'
+       include_directories : configinc,
+       dependencies : [libglib_dep])
+   endif
+-else
+-  gtester = executable('gtester', 'gtester.c',
+-    install : true,
+-    c_args : ['-UG_DISABLE_ASSERT'],
+-    include_directories : configinc,
+-    dependencies : [libglib_dep])
++#else
++#  gtester = executable('gtester', 'gtester.c',
++#    install : true,
++#    c_args : ['-UG_DISABLE_ASSERT'],
++#    include_directories : configinc,
++#    dependencies : [libglib_dep])
+ endif
+ 
+ report_conf = configuration_data()
+@@ -479,7 +479,3 @@ if enable_systemtap
+     install_dir : tapset_install_dir,
+   )
+ endif
+-
+-if build_tests
+-  subdir('tests')
+-endif
+diff --git a/meson.build b/meson.build
+index 429352318..cdf5850bb 100644
+--- a/meson.build
++++ b/meson.build
+@@ -2293,14 +2293,7 @@ test_timeout_slow = 180
+ pkg = import('pkgconfig')
+ windows = import('windows')
+ subdir('glib')
+-subdir('gobject')
+ subdir('gthread')
+-subdir('gmodule')
+-subdir('gio')
+-subdir('fuzzing')
+-if build_tests
+-  subdir('tests')
+-endif
+ 
+ # xgettext is optional (on Windows for instance)
+ if find_program('xgettext', required : get_option('nls')).found()
+-- 
+2.37.1 (Apple Git-137.1)
+
