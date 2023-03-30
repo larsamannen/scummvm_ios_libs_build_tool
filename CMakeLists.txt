@@ -297,27 +297,28 @@ FetchContent_Declare(_libvpx
 FetchContent_MakeAvailable(_libvpx)
 file(ARCHIVE_EXTRACT INPUT ${CMAKE_CURRENT_BINARY_DIR}/libvpx-1.13.0.tar.gz)
 
-#set(TARGETS "arm64-darwin-gcc" "armv7-darwin-gcc" "armv7s-darwin-gcc")
+set(TARGETS "arm64-darwin-gcc")
 
-#foreach(TARGET IN LISTS TARGETS)
-#  ExternalProject_Add(libvpx${TARGET}
-#    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/libvpx-1.13.0
-#    INSTALL_DIR ${PREFIX}
-#    CONFIGURE_COMMAND prefix="" ./configure "--target=${TARGET}" "--disable-shared" "--enable-static" "--disable-examples" "--disable-tools" "--disable-docs" "--disable-unit-tests" "--disable-install-bins" "--disable-install-srcs" "--size-limit=16384x16384" "--disable-vp8-encoder" "--disable-vp9-encoder"
-#    BUILD_COMMAND ${CMAKE_COMMAND} -E env
-#    make clean && make
-#    BUILD_IN_SOURCE TRUE
-#    INSTALL_COMMAND make DESTDIR=<INSTALL_DIR>/${TARGET} install
-#  )
-#endforeach()
+foreach(TARGET IN LISTS TARGETS)
+  ExternalProject_Add(libvpx${TARGET}
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/libvpx-1.13.0
+    INSTALL_DIR ${PREFIX}
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
+    prefix="" ./configure "--target=x86_64-iphonesimulator-gcc" "--disable-shared" "--enable-static" "--disable-examples" "--disable-tools" "--disable-docs" "--disable-unit-tests" "--disable-install-bins" "--disable-install-srcs" "--size-limit=16384x16384" "--disable-vp8-encoder" "--disable-vp9-encoder"
+    BUILD_COMMAND ${CMAKE_COMMAND} -E env
+    make clean && make
+    BUILD_IN_SOURCE TRUE
+    INSTALL_COMMAND make DESTDIR=<INSTALL_DIR>/${TARGET} install
+  )
+endforeach()
 
 #find_program (LIPO lipo REQUIRED)
 
 # Create a fat library. This will assume that libs/lib folder exist so it has to be crated
-#add_custom_target(libvpx
-#  DEPENDS libvpxarm64-darwin-gcc libvpxarmv7-darwin-gcc libvpxarmv7s-darwin-gcc
+add_custom_target(libvpx
+  DEPENDS libvpxarm64-darwin-gcc
 #  COMMAND ${LIPO} ${PREFIX}/arm64-darwin-gcc/lib/libvpx.a ${PREFIX}/armv7-darwin-gcc/lib/l#ibvpx.a ${PREFIX}/armv7s-darwin-gcc/lib/libvpx.a -create -output ${PREFIX}/lib/libvpx.a
-#)
+)
 
 #libcurl
 FetchContent_Declare(_libcurl
